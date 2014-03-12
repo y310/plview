@@ -1,0 +1,80 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
+require 'plview'
+require 'slop'
+
+include Plview
+
+opts = Slop.parse(help: true) do
+  banner 'Usage: plview [options]'
+  on 'v=', 'version', 'iOS Version'
+  on 'a=', 'application', 'App name'
+  on 'p=', 'plist', 'Plist name'
+  on 'versions', 'Print all available iOS versions'
+  on 'apps', 'Print all installed applications'
+  on 'plists', 'Print all plists for specified app'
+  on 'path', 'Print full path for (version|app|plist)'
+end
+
+if opts.versions?
+  if opts.path?
+    puts versions.values.sort
+  else
+    puts versions.keys.sort
+  end
+  exit
+end
+
+if versions.has_key?(opts[:v])
+  version = opts[:v]
+else
+  puts "Error: invalid version (#{opts[:v]}). Use -v with following version"
+  puts "Available versions:"
+  puts versions.keys.sort
+  exit
+end
+
+apps = apps(version)
+
+if opts.apps?
+  if opts.path?
+    puts apps.values.sort
+  else
+    puts apps.keys.sort
+  end
+  exit
+end
+
+if apps.has_key?(opts[:a])
+  app = opts[:a]
+else
+  puts "Error: invalid app name (#{opts[:a]}). Use -a with following version"
+  puts "Available apps:"
+  puts apps.keys.sort
+  exit
+end
+
+plists = plists(apps[app])
+
+if opts.plists?
+  if opts.path?
+    puts plists.values.map {|pl| pl.filename }.sort
+  else
+    puts plists.keys.sort
+  end
+  exit
+end
+
+if opts.path?
+  puts apps[app]
+  exit
+end
+
+if plists.has_key?(opts[:p])
+  plist = plists[opts[:p]]
+else
+  plist = plists.values.first
+end
+
+puts plist.value.to_hash.to_json
