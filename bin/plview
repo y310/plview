@@ -66,15 +66,19 @@ if opts.plists?
   exit
 end
 
+if plists.has_key?(opts[:p])
+  plist = plists[opts[:p]]
+  if opts.path?
+    puts plist.filename
+    exit
+  end
+else
+  plist = plists.values.first
+end
+
 if opts.path?
   puts apps[app]
   exit
-end
-
-if plists.has_key?(opts[:p])
-  plist = plists[opts[:p]]
-else
-  plist = plists.values.first
 end
 
 puts plist.value.to_hash.to_json
