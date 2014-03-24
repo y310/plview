@@ -81,4 +81,4 @@ if opts.path?
   exit
 end
 
-puts plist.value.to_hash.to_json
+puts JSON.pretty_generate(plist.value.to_hash)
